@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sid_flutter/Components/RumahPage/RumahPage.dart';
 import 'package:sid_flutter/utils/warna.dart';
 
 class MenuPage extends StatefulWidget {
@@ -19,95 +20,78 @@ class _MenuPageState extends State<MenuPage> {
       body: ListView(
         children: [
           Container(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0),
             alignment: Alignment.center,
-            margin: EdgeInsets.all(20),
             width: double.infinity,
-            height: 80.0,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.black26)),
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.home),
-                SizedBox(
-                  width: 20,
-                ),
-                Text(
+            child: Card(
+              child: ListTile(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => RumahPage()));
+                },
+                title: Text(
                   'Data Rumah',
                   style: TextStyle(fontSize: 22),
-                )
-              ],
+                ),
+                leading: Icon(
+                  Icons.home,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
           Container(
-            padding: EdgeInsets.only(left: 20.0, right: 20.0),
+            padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
             alignment: Alignment.center,
-            margin: EdgeInsets.all(20),
             width: double.infinity,
-            height: 80.0,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.black26)),
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.payment),
-                SizedBox(
-                  width: 20,
-                ),
-                Text(
-                  'Set Tagihan',
+            child: Card(
+              child: ListTile(
+                onTap: () {},
+                title: Text(
+                  'Tagihan',
                   style: TextStyle(fontSize: 22),
-                )
-              ],
+                ),
+                leading: Icon(
+                  Icons.payment,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
           Container(
-            padding: EdgeInsets.only(left: 20.0, right: 20.0),
+            padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
             alignment: Alignment.center,
-            margin: EdgeInsets.all(20),
             width: double.infinity,
-            height: 80.0,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.black26)),
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.date_range),
-                SizedBox(
-                  width: 20,
-                ),
-                Text(
+            child: Card(
+              child: ListTile(
+                onTap: () {},
+                title: Text(
                   'Data Bulan',
                   style: TextStyle(fontSize: 22),
-                )
-              ],
+                ),
+                leading: Icon(
+                  Icons.date_range,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
           Container(
-            padding: EdgeInsets.only(left: 20.0, right: 20.0),
+            padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
             alignment: Alignment.center,
-            margin: EdgeInsets.all(20),
             width: double.infinity,
-            height: 80.0,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Colors.black26)),
-            child: Row(
-              children: <Widget>[
-                Icon(Icons.people),
-                SizedBox(
-                  width: 20,
-                ),
-                Text(
+            child: Card(
+              child: ListTile(
+                onTap: () {},
+                title: Text(
                   'Pengguna',
                   style: TextStyle(fontSize: 22),
-                )
-              ],
+                ),
+                leading: Icon(
+                  Icons.people,
+                  color: Colors.black,
+                ),
+              ),
             ),
           ),
         ],

@@ -63,4 +63,20 @@ class ApiService {
       return null;
     }
   }
+
+  //GET ALL DATA RUMAH
+  Future<List<Rumah>?> AllDataRumah(String token) async {
+    print("Token " + token);
+    var url = Uri.parse(BaseUrl + 'rumah');
+    var response =
+        await client.get(url, headers: {'Authorization': 'BEARER ${token}'});
+    Map responsemessage = jsonDecode(response.body);
+    responseCode = ResponseCode.fromJson(responsemessage);
+    print("Data Rumah? " + rumahFromJson(response.body).toString());
+    if (response.statusCode == 200) {
+      return rumahFromJson(response.body);
+    } else {
+      return null;
+    }
+  }
 }

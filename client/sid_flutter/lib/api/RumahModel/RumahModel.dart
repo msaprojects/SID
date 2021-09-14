@@ -41,7 +41,7 @@ class Rumah {
 
 List<Rumah> rumahFromJson(String dataJson) {
   final data = json.decode(dataJson);
-  return List<Rumah>.from(data.map((item) => Rumah.fromJson(item)));
+  return List<Rumah>.from(data["data"].map((item) => Rumah.fromJson(item)));
 }
 
 String rumahToJson(Rumah data) {

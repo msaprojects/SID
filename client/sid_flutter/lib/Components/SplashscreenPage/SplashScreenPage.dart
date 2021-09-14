@@ -41,10 +41,14 @@ class _SplashScreenState extends State<SplashScreen> {
               Container(
                 width: 175,
                 height: 100,
-                child: Text("Logo"),
+                child: Image.asset('assets/images/sid.png'),
               ),
               SizedBox(
-                height: 5,
+                height: 10,
+              ),
+              Text('Desa Klutuk Kulon'),
+              SizedBox(
+                height: 10,
               ),
               CircularProgressIndicator(
                 color: Colors.white,

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ReusableClasses {
+  late SharedPreferences sp;
+  var access_token = "", refresh_token = "", nama = "", jabatan = "";
+
   //MODAL BOTTOM SHEET FOR WARNING ERROR
   modalbottomWarning(BuildContext context, String title, String message,
       String kode, String imagelocation) {
@@ -52,5 +56,13 @@ class ReusableClasses {
             ),
           );
         });
+  }
+
+  cekToken() async {
+    sp = await SharedPreferences.getInstance();
+    access_token = sp.getString("access_token")!;
+    refresh_token = sp.getString("refresh_token")!;
+    jabatan = sp.getString("jabatan")!;
+    nama = sp.getString("nama")!;
   }
 }

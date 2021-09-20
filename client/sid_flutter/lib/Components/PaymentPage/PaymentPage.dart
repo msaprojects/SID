@@ -2,11 +2,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sid_flutter/api/RumahModel/RumahModel.dart';
+import 'package:sid_flutter/Components/PaymentPage/DetailBayarPage.dart';
+import 'package:sid_flutter/Components/RumahPage/RumahPage.dart';
 import 'package:sid_flutter/api/utils/apiService.dart';
 import 'package:sid_flutter/utils/ReusableClass.dart';
 import 'package:sid_flutter/utils/warna.dart';
@@ -30,20 +30,27 @@ class _ScanPaymentPageState extends State<ScanPaymentPage> {
   //VARIABLE
   String? dataqr;
   String? token;
+  ApiService _apiService = new ApiService();
+  late SharedPreferences sp;
+  var access_token = "", refresh_token = "", nama = "", jabatan = "";
+  late bool isSuccess;
 
-  getSp() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    token = sp.getString("access_token");
+  cekToken() async {
+    sp = await SharedPreferences.getInstance();
+    access_token = sp.getString("access_token")!;
+    refresh_token = sp.getString("refresh_token")!;
+    jabatan = sp.getString("jabatan")!;
+    nama = sp.getString("nama")!;
   }
 
   @override
   void initState() {
+    super.initState();
     if (Platform.isIOS) {
       audioCache.fixedPlayer?.notificationService.startHeadlessService();
     }
-    getSp();
+    cekToken();
     print("token? " + token.toString());
-    super.initState();
   }
 
   void playSound() async {
@@ -76,11 +83,12 @@ class _ScanPaymentPageState extends State<ScanPaymentPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  if (result != null)
-                    Text(
-                        'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
-                  else
-                    Text('Scan a code'),
+                  // if (result != null)
+                  //   Text(
+                  //       'Barcode Type: ${describeEnum(result!.format)}   Data: ${result!.code}')
+                  // else
+                  //   Text('Scan a code'),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -148,6 +156,28 @@ class _ScanPaymentPageState extends State<ScanPaymentPage> {
                       // )
                     ],
                   ),
+                  result == null
+                      ? Text('Scan a code')
+                      : result!.code.split('2b')[0].toString() != '\$'
+                          ? Text('QR Tidak Valid!')
+                          : ElevatedButton(
+                              onPressed: () {
+                                _PaymentDetail();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0.0,
+                                primary: primaryColor,
+                              ),
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(18)),
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "Lanjutkan Pembayaran",
+                                  ),
+                                ),
+                              )),
                 ],
               ),
             ),
@@ -184,6 +214,10 @@ class _ScanPaymentPageState extends State<ScanPaymentPage> {
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
+        print('PRINT QR VALUE? ' +
+            result.toString() +
+            ' ~ ' +
+            result!.code.split('2b')[0].toString());
       });
     });
     setState(() {
@@ -200,9 +234,18 @@ class _ScanPaymentPageState extends State<ScanPaymentPage> {
     }
   }
 
+  _PaymentDetail() {
+    print("Dapet QR? " + result!.code.toString());
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+      return DetailBayarPage(qrvalue: result!.code.toString());
+    }));
+    return;
+  }
+
   @override
   void dispose() {
     controller?.dispose();
     super.dispose();
+    cekToken();
   }
 }

@@ -14,8 +14,9 @@ class RumahPage extends StatefulWidget {
 class _RumahPageState extends State<RumahPage> {
   TextEditingController _tecKode = TextEditingController(text: "");
   TextEditingController _tecKeterangan = TextEditingController(text: "");
-  String _dropdownValue = "Rumah";
+  String _dropdownValue = "Rumah", kodeRumah = 'A1';
   bool _aktif = false;
+  int _aktiftoboolean = 0;
   var access_token = "", refresh_token = "", nama = "", jabatan = "";
   late bool isSuccess;
   late SharedPreferences sp;
@@ -23,10 +24,14 @@ class _RumahPageState extends State<RumahPage> {
 
   cekToken() async {
     sp = await SharedPreferences.getInstance();
-    access_token = sp.getString("access_token")!;
-    refresh_token = sp.getString("refresh_token")!;
-    jabatan = sp.getString("jabatan")!;
-    nama = sp.getString("nama")!;
+    setState(() {
+      access_token = sp.getString("access_token")!;
+      refresh_token = sp.getString("refresh_token")!;
+      jabatan = sp.getString("jabatan")!;
+      nama = sp.getString("nama")!;
+    });
+    print(
+        access_token + " ~ " + refresh_token + " ~ " + jabatan + " ~ " + nama);
     //checking jika token kosong maka di arahkan ke menu login jika tidak akan meng-hold token dan refresh token
     // if (access_token == null) {
     //   Navigator.of(context).pushAndRemoveUntil(
@@ -46,8 +51,8 @@ class _RumahPageState extends State<RumahPage> {
 
   @override
   void initState() {
-    cekToken();
     super.initState();
+    cekToken();
   }
 
   @override
@@ -82,16 +87,23 @@ class _RumahPageState extends State<RumahPage> {
             future: _apiService.AllDataRumah(access_token),
             builder: (context, AsyncSnapshot<List<Rumah>?> snapshot) {
               if (snapshot.hasError) {
-                print(snapshot.error.toString());
-                return ReusableClasses().modalbottomWarning(
-                    context,
-                    "Error",
-                    "${_apiService.responseCode.messageApi}",
-                    "400",
-                    'assets/images/sorry.png');
+                return Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text('Ada masalah ${snapshot.error}')
+                  ],
+                ));
               } else if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(),
                       SizedBox(
@@ -102,11 +114,20 @@ class _RumahPageState extends State<RumahPage> {
                   ),
                 );
               } else if (snapshot.connectionState == ConnectionState.done) {
-                List<Rumah>? dataRumah = snapshot.data;
-                return _listDataRumah(dataRumah);
+                print("Status Koneksi?" + snapshot.connectionState.toString());
+                if (snapshot.hasData) {
+                  List<Rumah>? dataRumah = snapshot.data;
+                  return _listDataRumah(dataRumah);
+                } else {
+                  return Center(
+                    child: Text('maaf, Belum ada data tersedia...'),
+                  );
+                }
               } else {
                 return Center(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                           'Sepertinya ada masalah, coba back dan buka lagi menu ini yaa...')
@@ -114,35 +135,66 @@ class _RumahPageState extends State<RumahPage> {
                   ),
                 );
               }
-              // return const Center(
-              //   child: CircularProgressIndicator(),
-              // );
             }));
   }
 
   Widget _listDataRumah(List<Rumah>? dataIndex) {
-    return SingleChildScrollView(
-        child: Expanded(
-      flex: 1,
-      child: Container(
-          padding: EdgeInsets.only(left: 20, right: 20),
-          child: Scrollbar(child: ListView.builder(
-            itemBuilder: (context, index) {
-              Rumah? datarumah = dataIndex![index];
-              return Container(
-                child: Card(
-                  child: InkWell(
-                    onTap: () {},
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [Text(datarumah.kode)],
+    return ListView.builder(
+      itemCount: dataIndex!.length,
+      itemBuilder: (context, index) {
+        Rumah? datarumah = dataIndex[index];
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Card(
+              color: datarumah.aktif == 1 ? Colors.white : Colors.redAccent,
+              child: Padding(
+                padding:
+                    EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text('Kode : '),
+                        Text(
+                          datarumah.kode,
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
-                  ),
+                    Row(
+                      children: [
+                        Text('Jenis bangunan : '),
+                        Text(
+                          datarumah.jenis_rumah,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Keterangan : '),
+                        Text(
+                          datarumah.keterangan,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text('Status : '),
+                        Text(
+                          datarumah.aktif == 1
+                              ? 'Ada Orang'
+                              : 'Tidak Ada Orang',
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
-          ))),
-    ));
+              )),
+        );
+      },
+    );
   }
 
   void _modalAddRumah() {
@@ -166,6 +218,7 @@ class _RumahPageState extends State<RumahPage> {
                 children: [
                   TextFormField(
                       controller: _tecKode,
+                      textCapitalization: TextCapitalization.characters,
                       decoration: InputDecoration(
                         icon: Icon(Icons.add_business),
                         labelText: 'Kode Rumah',
@@ -199,11 +252,12 @@ class _RumahPageState extends State<RumahPage> {
                               onChanged: (String? value) {
                                 setState(() {
                                   _dropdownValue = value!;
-                                  print(value);
+                                  print("Value Dropdown? " + value);
                                 });
                               },
                               items: <String>[
                                 'Rumah',
+                                'Kontrakan',
                                 'Kost',
                                 'Lainnya'
                               ].map<DropdownMenuItem<String>>((String value) {
@@ -224,8 +278,15 @@ class _RumahPageState extends State<RumahPage> {
                             Switch(
                               value: _aktif,
                               onChanged: (value) {
-                                _aktif = value;
-                                print(value);
+                                setState(() {
+                                  _aktif = value;
+                                  if (_aktif) {
+                                    _aktiftoboolean = 1;
+                                  } else {
+                                    _aktiftoboolean = 0;
+                                  }
+                                  print("Value Switch?" + value.toString());
+                                });
                               },
                               activeColor: primaryColor,
                               activeTrackColor: secondColor,
@@ -239,7 +300,15 @@ class _RumahPageState extends State<RumahPage> {
                     height: 20,
                   ),
                   ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // _addRumah();
+                        _modalKonfirmasi();
+                        // Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0.0,
+                        primary: Colors.white,
+                      ),
                       child: Ink(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(18)),
@@ -247,7 +316,10 @@ class _RumahPageState extends State<RumahPage> {
                           width: 325,
                           height: 45,
                           alignment: Alignment.center,
-                          child: Text("Simpan"),
+                          child: Text(
+                            "Lanjutkan",
+                            style: TextStyle(color: primaryColor, fontSize: 18),
+                          ),
                         ),
                       )),
                 ],
@@ -255,5 +327,153 @@ class _RumahPageState extends State<RumahPage> {
             ),
           );
         });
+  }
+
+  void _modalKonfirmasi() {
+    var koderumah = _tecKode.text.toString();
+    var keterangan = _tecKeterangan.text.toString();
+    if (koderumah == "" || keterangan == "") {
+      ReusableClasses().modalbottomWarning(
+          context,
+          "Tidak Valid!",
+          "Pastikan semua kolom terisi dengan benar",
+          'f405',
+          'assets/images/sorry.png');
+    } else {
+      showModalBottomSheet(
+          isScrollControlled: true,
+          context: context,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0))),
+          builder: (BuildContext context) {
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: Container(
+                padding: EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      'Konfirmasi',
+                      style:
+                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text('Apakah data yang anda masukkan sudah sesuai.?',
+                        style: TextStyle(fontSize: 16)),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0.0,
+                              primary: Colors.red,
+                            ),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(18)),
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Periksa Lagi",
+                                ),
+                              ),
+                            )),
+                        SizedBox(
+                          width: 55,
+                        ),
+                        ElevatedButton(
+                            onPressed: () {
+                              _addRumah();
+                              Navigator.of(context).pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0.0,
+                              primary: Colors.white,
+                            ),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(18)),
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Simpan",
+                                  style: TextStyle(color: primaryColor),
+                                ),
+                              ),
+                            )),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+  }
+
+  void _addRumah() {
+    var koderumah = _tecKode.text.toString();
+    var keterangan = _tecKeterangan.text.toString();
+    _dropdownValue == 'Rumah'
+        ? kodeRumah = 'A1-'
+        : _dropdownValue == 'Kost'
+            ? kodeRumah = 'B1-'
+            : _dropdownValue == 'Kontrakan'
+                ? kodeRumah = 'C1-'
+                : kodeRumah = 'D1-';
+    if (koderumah == "" || keterangan == "") {
+      ReusableClasses().modalbottomWarning(
+          context,
+          "Tidak Valid!",
+          "Pastikan semua kolom terisi dengan benar",
+          'f405',
+          'assets/images/sorry.png');
+    } else {
+      Rumah data = Rumah(
+          idnomor_rumah: 0,
+          kode: kodeRumah + koderumah,
+          keterangan: keterangan,
+          jenis_rumah: _dropdownValue.toString(),
+          aktif: _aktiftoboolean);
+      _apiService.addRumah(access_token, data).then((isSuccess) {
+        if (isSuccess) {
+          _tecKode.clear();
+          _tecKeterangan.clear();
+
+          ReusableClasses().modalbottomWarning(
+              context,
+              "Berhasil!",
+              "${_apiService.responseCode.messageApi}",
+              "f200",
+              "assets/images/congratulations.png");
+        } else {
+          ReusableClasses().modalbottomWarning(
+              context,
+              "Gagal!",
+              "${_apiService.responseCode.messageApi}",
+              "f400",
+              "assets/images/sorry.png");
+        }
+        return;
+      });
+    }
   }
 }

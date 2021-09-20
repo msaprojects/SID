@@ -16,10 +16,37 @@ class _DashboardPageState extends State<DashboardPage> {
   late SharedPreferences sp;
   ApiService _apiService = new ApiService();
 
+  cekToken() async {
+    sp = await SharedPreferences.getInstance();
+    setState(() {
+      access_token = sp.getString("access_token")!;
+      refresh_token = sp.getString("refresh_token")!;
+      jabatan = sp.getString("jabatan")!;
+      nama = sp.getString("nama")!;
+    });
+    print(
+        access_token + " ~ " + refresh_token + " ~ " + jabatan + " ~ " + nama);
+    //checking jika token kosong maka di arahkan ke menu login jika tidak akan meng-hold token dan refresh token
+    // if (access_token == null) {
+    //   Navigator.of(context).pushAndRemoveUntil(
+    //       MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+    //       (Route<dynamic> route) => false);
+    // } else {
+    //   _apiService.refreshToken(refresh_token).then((value) => setState(() {
+    //         if (!value) {
+    //           Navigator.of(context).pushAndRemoveUntil(
+    //               MaterialPageRoute(
+    //                   builder: (BuildContext context) => LoginPage()),
+    //               (Route<dynamic> route) => false);
+    //         }
+    //       }));
+    // }
+  }
+
   @override
   void initState() {
-    cekToken();
     super.initState();
+    cekToken();
   }
 
   @override
@@ -27,31 +54,10 @@ class _DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
-  cekToken() async {
-    sp = await SharedPreferences.getInstance();
-    access_token = sp.getString("access_token")!;
-    refresh_token = sp.getString("refresh_token")!;
-    jabatan = sp.getString("jabatan")!;
-    nama = sp.getString("nama")!;
-    //checking jika token kosong maka di arahkan ke menu login jika tidak akan meng-hold token dan refresh token
-    if (access_token == null) {
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
-          (Route<dynamic> route) => false);
-    } else {
-      _apiService.refreshToken(refresh_token).then((value) => setState(() {
-            if (!value) {
-              Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => LoginPage()),
-                  (Route<dynamic> route) => false);
-            }
-          }));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    print(
+        access_token + " | " + refresh_token + " | " + jabatan + " | " + nama);
     final screenHeight = MediaQuery.of(context).size.height;
     Size size = MediaQuery.of(context).size;
     return Scaffold(

@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      body: Center(
+      body: SingleChildScrollView(
         child: Container(
           color: backgroundColor,
           padding: EdgeInsets.all(25.0),
@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
           height: size.height,
           child: Stack(
             alignment: Alignment.center,
-            fit: StackFit.loose,
+            fit: StackFit.passthrough,
             children: [
               Positioned.fill(
                   top: 20,
@@ -61,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
               Positioned(
                   child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     "[ S I D ]",
@@ -101,23 +102,20 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(
                     height: 35,
                   ),
-                  Positioned(
-                    bottom: 10,
-                    child: ElevatedButton(
-                        onPressed: () {
-                          LoginClick();
-                        },
-                        child: Ink(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Container(
-                            width: 325,
-                            height: 45,
-                            alignment: Alignment.center,
-                            child: Text("Login"),
-                          ),
-                        )),
-                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        LoginClick();
+                      },
+                      child: Ink(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Container(
+                          width: 325,
+                          height: 45,
+                          alignment: Alignment.center,
+                          child: Text("Login"),
+                        ),
+                      )),
                 ],
               ))
             ],

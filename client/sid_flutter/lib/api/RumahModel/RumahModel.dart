@@ -2,13 +2,12 @@ import 'dart:convert';
 
 class Rumah {
   num idnomor_rumah, aktif;
-  var kode, keterangan, jenis_rumah, barcode_gen;
+  var kode, keterangan, jenis_rumah;
   Rumah(
       {required this.idnomor_rumah,
       this.kode,
       this.keterangan,
       this.jenis_rumah,
-      this.barcode_gen,
       required this.aktif});
 
   factory Rumah.fromJson(Map<String, dynamic> map) {
@@ -17,25 +16,22 @@ class Rumah {
       kode: map["kode"],
       keterangan: map["keterangan"],
       jenis_rumah: map["jenis_rumah"],
-      barcode_gen: map["barcode_gen"],
       aktif: map["aktif"],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "idnomor_rumah": idnomor_rumah,
       "kode": kode,
       "keterangan": keterangan,
       "jenis_rumah": jenis_rumah,
-      "barcode_gen": barcode_gen,
       "aktif": aktif,
     };
   }
 
   @override
   String toString() {
-    return 'Rumah{idnomor_rumah: $idnomor_rumah, kode: $kode, keterangan: $keterangan, jenis_rumah: $jenis_rumah, barcode_gen: $barcode_gen, aktif: $aktif}';
+    return 'Rumah{idnomor_rumah: $idnomor_rumah, kode: $kode, keterangan: $keterangan, jenis_rumah: $jenis_rumah, aktif: $aktif}';
   }
 }
 

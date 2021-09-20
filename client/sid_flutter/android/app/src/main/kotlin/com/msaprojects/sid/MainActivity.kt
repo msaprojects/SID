@@ -1,4 +1,4 @@
-package com.example.sid_flutter
+package com.msaprojects.sid
 
 import io.flutter.embedding.android.FlutterActivity
 

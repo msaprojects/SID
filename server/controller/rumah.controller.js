@@ -100,6 +100,7 @@ async function getAllRumah(req, res) {
                             data: error
                         })
                     } else {
+                        console.log('Get Rumah...')
                         var sqlquery = "SELECT * FROM nomor_rumah"
                         database.query(sqlquery, (error, rows) => {
                             if (error) {
@@ -180,7 +181,7 @@ async function getDetailRumah(req, res) {
                                 });
                             } else {
                                 if (rows.length <= 0) {
-                                    return res.status(204).send({
+                                    return res.status(200).send({
                                         message: "Data tidak ditemukan!",
                                         data: rows
                                     });
@@ -286,33 +287,53 @@ async function addRumah(req, res) {
                                             aktif: aktif,
                                             created: new Date().toISOString().replace('T', ' ').substring(0, 19)
                                         }
-                                        var sqlquery = "INSERT INTO nomor_rumah SET ?"
-                                        database.query(sqlquery, datarumah, (error, result) => {
-                                            if (error) {
-                                                database.rollback(function () {
-                                                    database.release()
-                                                    return res.status(407).send({
-                                                        message: 'Sorry :(, we have problems sql query!',
-                                                        error: error
-                                                    })
+                                        var sqldatafilter = 'SELECT * FROM nomor_rumah WHERE kode = ?'
+                                        database.query(sqldatafilter, kode, (error, result) => {
+                                          if(error){
+                                            database.rollback(function () {
+                                                database.release()
+                                                return res.status(407).send({
+                                                    message: 'Sorry :(, we have problems sql query!',
+                                                    error: error
                                                 })
-                                            } else {
-                                                database.commit(function (errcommit) {
-                                                    if (errcommit) {
+                                            })
+                                          }  else{
+                                              if(result.length <=0){
+                                                var sqlquery = "INSERT INTO nomor_rumah SET ?"
+                                                database.query(sqlquery, datarumah, (error, result) => {
+                                                    if (error) {
                                                         database.rollback(function () {
                                                             database.release()
                                                             return res.status(407).send({
-                                                                message: 'data gagal disimpan!'
+                                                                message: 'Sorry :(, we have problems sql query!',
+                                                                error: error
                                                             })
                                                         })
                                                     } else {
-                                                        database.release()
-                                                        return res.status(200).send({
-                                                            message: 'Data berhasil disimpan!'
+                                                        database.commit(function (errcommit) {
+                                                            if (errcommit) {
+                                                                database.rollback(function () {
+                                                                    database.release()
+                                                                    return res.status(407).send({
+                                                                        message: 'data gagal disimpan!'
+                                                                    })
+                                                                })
+                                                            } else {
+                                                                database.release()
+                                                                return res.status(200).send({
+                                                                    message: 'Data berhasil disimpan!'
+                                                                })
+                                                            }
                                                         })
                                                     }
                                                 })
-                                            }
+        
+                                              }else{
+                                                    return res.status(400).send({
+                                                        message: `Kode ${kode} sudah terdaftar!`
+                                                    })
+                                              }
+                                          }
                                         })
                                     })
                                 }

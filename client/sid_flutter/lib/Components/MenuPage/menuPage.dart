@@ -12,11 +12,6 @@ class _MenuPageState extends State<MenuPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: primaryColor,
-        centerTitle: true,
-        title: Text('Menu'),
-      ),
       body: ListView(
         children: [
           Container(

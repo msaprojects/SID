@@ -8,7 +8,7 @@ import 'package:sid_flutter/api/ResponseCode/responsecodeModel.dart';
 import 'package:sid_flutter/api/RumahModel/RumahModel.dart';
 
 class ApiService {
-  final String BaseUrl = "http://192.168.1.213:9990/api/v1/";
+  final String BaseUrl = "http://sid.sedotwcsurabaya-cm.com/api/v1/";
   Client client = Client();
   ResponseCode responseCode = ResponseCode();
 
@@ -52,11 +52,13 @@ class ApiService {
   //GET DATA RUMAH DENGAN BARCODE_GEN
   Future<List<Rumah>?> DataRumah(String token, String qrcode) async {
     var url = Uri.parse(BaseUrl + 'rumah/' + qrcode);
-    var response =
-        await client.get(url, headers: {'content-type': 'application/json'});
+    var response = await client.get(url, headers: {
+      'content-type': 'application/json',
+      'Authorization': 'BEARER ${token}'
+    });
     Map responsemessage = jsonDecode(response.body);
     responseCode = ResponseCode.fromJson(responsemessage);
-    print("Data Rumah?" + response.body);
+    print("Data Detail Rumah?" + rumahFromJson(response.body).toString());
     if (response.statusCode == 200) {
       return rumahFromJson(response.body);
     } else {
@@ -77,6 +79,24 @@ class ApiService {
       return rumahFromJson(response.body);
     } else {
       return null;
+    }
+  }
+
+  //ADD RUMAH
+  Future<bool> addRumah(String token, Rumah data) async {
+    var url = Uri.parse(BaseUrl + 'rumah');
+    var response = await client.post(url,
+        headers: {
+          'content-type': 'application/json',
+          'Authorization': 'Bearer ${token}'
+        },
+        body: rumahToJson(data));
+    Map responsemessage = jsonDecode(response.body);
+    responseCode = ResponseCode.fromJson(responsemessage);
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

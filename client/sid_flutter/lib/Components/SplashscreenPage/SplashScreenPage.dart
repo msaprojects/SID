@@ -4,6 +4,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sid_flutter/Components/LoginPage/LoginPage.dart';
+import 'package:sid_flutter/utils/warna.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -51,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 height: 10,
               ),
               CircularProgressIndicator(
-                color: Colors.white,
+                color: primaryColor,
                 strokeWidth: 1,
               ),
               SizedBox(height: 10),

@@ -55,5 +55,14 @@ router.put('/rumah/:idnomor_rumah', function(req, res){
     RouteToRumahController.ubahRumah(req, res)
 })
 
-
+var RouteToTagihanController = require('../controller/tagihan.controller')
+router.get('/tagihan', function(req, res){
+    RouteToTagihanController.getSemuaTagihan(req, res)
+})
+router.post('/tagihan', function(req, res){
+    RouteToTagihanController.addTagihan(req, res)
+})
+router.put('/tagihan/:idtagihan', function(req, res){
+    RouteToTagihanController.ubahTagihan(req, res)
+})
 module.exports = router;

@@ -106,14 +106,21 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         LoginClick();
                       },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0.0,
+                        primary: primaryColor,
+                      ),
                       child: Ink(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(18)),
                         child: Container(
                           width: 325,
                           height: 45,
                           alignment: Alignment.center,
-                          child: Text("Login"),
+                          child: Text(
+                            "Login",
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
                         ),
                       )),
                 ],

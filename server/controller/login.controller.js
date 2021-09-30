@@ -123,12 +123,6 @@ async function GenerateNewToken(req, res) {
     }
 }
 
-function generateToken(user) {
-    return jwt.sign(user, process.env.ACCESS_SECRET, {
-        expiresIn: process.env.ACCESS_EXPIRED
-    });
-}
-
 module.exports = {
     Login,
     GenerateNewToken

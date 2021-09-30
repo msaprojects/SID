@@ -75,12 +75,12 @@ class _RumahPageState extends State<RumahPage> {
           },
           label: Text(
             'Tambah',
-            style: TextStyle(color: primaryColor),
+            style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: primaryColor,
           icon: Icon(
             Icons.add,
-            color: primaryColor,
+            color: Colors.white,
           ),
         ),
         body: FutureBuilder(

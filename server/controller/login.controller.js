@@ -53,9 +53,9 @@ async function Login(req, res) {
                                         console.log(eResult);
                                         if (eErr) {
                                             console.log(eErr);
-                                            return res.status(401).send({
+                                            return res.status(401).send(JSON.stringify({
                                                 message: 'Username atau Password anda Salah!'
-                                            });
+                                            }))
                                         } else if (eResult) {
                                             console.log("Login Berhasil")
                                             const user = {
@@ -68,17 +68,17 @@ async function Login(req, res) {
                                                 expiresIn: process.env.REFRESH_EXPIRED
                                             })
                                             refreshTokens.push(refresh_token)
-                                            return res.status(200).send({
+                                            return res.status(200).send(JSON.stringify({
                                                 message: 'Selamat, Anda Berhasil Login',
                                                 access_token: access_token,
                                                 refresh_token: refresh_token,
                                                 nama: rows[0].nama,
                                                 jabatan: rows[0].jabatan
-                                            })
+                                            }))
                                         } else {
-                                            return res.status(401).send({
+                                            return res.status(401).send(JSON.stringify({
                                                 message: 'Username atau Password salah'
-                                            });
+                                            }))
                                         }
                                     })
                             }

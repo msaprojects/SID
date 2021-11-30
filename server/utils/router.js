@@ -65,4 +65,5 @@ router.post('/tagihan', function(req, res){
 router.put('/tagihan/:idtagihan', function(req, res){
     RouteToTagihanController.ubahTagihan(req, res)
 })
+
 module.exports = router;

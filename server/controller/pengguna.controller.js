@@ -1,15 +1,7 @@
-require('dotenv').config()
-const jwt = require('jsonwebtoken')
-const mysql = require('mysql')
-const bcrypt = require('bcrypt')
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-    timezone: 'utc-8'
-})
+require("dotenv").config();
+const bcrypt = require("bcrypt");
+const pool = require("../utils/pool.configuration");
+const nows = require("../utils/golobal.variable");
 
 /**
  * @swagger
@@ -24,6 +16,7 @@ const pool = mysql.createPool({
  *          type: object
  *          required:
  *              - nama
+ *              - username
  *              - jabatan
  *              - username
  *              - password
@@ -31,7 +24,7 @@ const pool = mysql.createPool({
  *              idpengguna:
  *                  type: int
  *                  description: auto increment
- *              nama: 
+ *              nama:
  *                  type: string
  *                  description: nama pengguna
  *              jabatan:
@@ -80,53 +73,42 @@ const pool = mysql.createPool({
  */
 
 async function getAllPengguna(req, res) {
-    const token = req.headers.authorization.split(' ')[1]
-    try {
-        jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-            if (jwterror) {
-                return res.status(401).send({
-                    message: "Sorry, Token tidak valid!",
-                    data: jwterror
-                })
-            } else {
-                pool.getConnection(function (error, database) {
-                    if (error) {
-                        return res.status(400).send({
-                            message: "Pool refushed, sorry :(, try again or contact developer",
-                            data: error
-                        })
-                    } else {
-                        var sqlquery = "SELECT idpengguna, nama, jabatan, username, aktif FROM pengguna"
-                        database.query(sqlquery, (error, rows) => {
-                            if (error) {
-                                return res.status(500).send({
-                                    message: "Sorry :(, my query has been error",
-                                    data: error
-                                });
-                            } else {
-                                if (rows.length <= 0) {
-                                    return res.status(204).send({
-                                        message: "Data masih kosong",
-                                        data: rows
-                                    });
-                                } else {
-                                    return res.status(200).send({
-                                        message: "Data berhasil fetch.",
-                                        data: rows
-                                    });
-                                }
-                            }
-                        })
-                    }
-                })
-            }
-        })
-    } catch (error) {
-        return res.status(403).send({
-            message: "Forbidden.",
-            data: rows
-        });
+  pool.getConnection(function (error, database) {
+    if (error) {
+      return res.status(400).send({
+        message: "Pool refushed, sorry :(, try again or contact developer",
+        error: error,
+        data: null,
+      });
+    } else {
+      var sqlquery =
+        "SELECT idpengguna, nama, jabatan, username, aktif FROM pengguna";
+      database.query(sqlquery, (error, rows) => {
+        database.release();
+        if (error) {
+          return res.status(500).send({
+            message: "Sorry :(, my query has been error",
+            error: error,
+            data: null,
+          });
+        } else {
+          if (rows.length <= 0) {
+            return res.status(204).send({
+              message: "Data masih kosong",
+              error: null,
+              data: rows,
+            });
+          } else {
+            return res.status(200).send({
+              message: "Data berhasil fetch.",
+              error: null,
+              data: rows,
+            });
+          }
+        }
+      });
     }
+  });
 }
 
 /**
@@ -144,7 +126,7 @@ async function getAllPengguna(req, res) {
  *            name: parameter yang dikirim
  *            schema:
  *              properties:
- *                  nama: 
+ *                  nama:
  *                      type: string
  *                  jabatan:
  *                      type: string
@@ -152,6 +134,8 @@ async function getAllPengguna(req, res) {
  *                      type: string
  *                  password:
  *                      type: string
+ *                  aktif:
+ *                      type: integer
  *      responses:
  *          200:
  *              description: jika data berhasil di fetch
@@ -164,99 +148,83 @@ async function getAllPengguna(req, res) {
  *          405:
  *              description: parameter yang dikirim tidak sesuai
  *          407:
- *              description: gagal generate encrypt password 
+ *              description: gagal generate encrypt password
  *          500:
  *              description: kesalahan pada query sql
  */
 
 async function addPengguna(req, res) {
-    var nama = req.body.nama
-    var jabatan = req.body.jabatan
-    var username = req.body.username
-    var password = req.body.password
-    var aktif = req.body.aktif
-    const token = req.headers.authorization.split(' ')[1];
-    if (Object.keys(req.body).length != 5) {
-        return res.status(405).send({
-            message: 'parameter tidak sesuai!'
-        })
+  var nama = req.body.nama;
+  var username = req.body.username;
+  var password = req.body.password;
+  var jabatan = req.body.jabatan;
+  var aktif = req.body.aktif;
+  pool.getConnection(function (error, database) {
+    if (error) {
+      return res.status(400).send({
+        message: "Sorry, Pool Refushed",
+        error: error,
+        data: null,
+      });
     } else {
-        try {
-            jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-                if (jwterror) {
-                    return res.status(401).send({
-                        message: "Sorry, Token tidak valid!",
-                        data: jwterror
+      database.beginTransaction(function (error) {
+        bcrypt.hash(password, 10, (errorencrypt, encrypt) => {
+          if (errorencrypt) {
+            return res.status(407).send({
+              message: "Gagal generate password!",
+              error: errorencrypt,
+              data: null,
+            });
+          } else {
+            let datapengguna = {
+              nama: nama,
+              jabatan: jabatan,
+              username: username,
+              password: encrypt,
+              aktif: aktif,
+              created: nows.nows,
+            };
+            var sqlquery = "INSERT INTO pengguna SET ?";
+            database.query(sqlquery, datapengguna, (error, result) => {
+              database.release();
+              if (error) {
+                database.rollback(function () {
+                  return res.status(407).send({
+                    message: "Sorry :(, we have problems sql query!",
+                    error: error,
+                    data: null,
+                  });
+                });
+              } else {
+                database.commit(function (errcommit) {
+                  if (errcommit) {
+                    database.rollback(function () {
+                      return res.status(407).send({
+                        message: "data gagal disimpan!",
+                        error: errcommit,
+                        data: null,
+                      });
                     });
-                } else {
-                    pool.getConnection(function (error, database) {
-                        if (error) {
-                            return res.status(400).send({
-                                message: "Soory, Pool Refushed",
-                                data: error
-                            });
-                        } else {
-                            database.beginTransaction(function (error) {
-                                bcrypt.hash(password, 10, (errorencrypt, encrypt) => {
-                                    if (errorencrypt) {
-                                        return res.status(407).send({
-                                            message: 'Gagal generate password!'
-                                        });
-                                    } else {
-                                        let datapengguna = {
-                                            nama: nama,
-                                            jabatan: jabatan,
-                                            username: username,
-                                            password: encrypt,
-                                            aktif: aktif,
-                                            created: new new Date().toISOString().replace('T', ' ').substring(0,19)
-                                        }
-                                        var sqlquery = "INSERT INTO pengguna SET ?"
-                                        database.query(sqlquery, datapengguna, (error, result) => {
-                                            if (error) {
-                                                database.rollback(function () {
-                                                    database.release()
-                                                    return res.status(407).send({
-                                                        message: 'Sorry :(, we have problems sql query!',
-                                                        error: error
-                                                    })
-                                                })
-                                            } else {
-                                                database.commit(function (errcommit) {
-                                                    if (errcommit) {
-                                                        database.rollback(function () {
-                                                            database.release()
-                                                            return res.status(407).send({
-                                                                message: 'data gagal disimpan!'
-                                                            })
-                                                        })
-                                                    } else {
-                                                        database.release()
-                                                        return res.status(200).send({
-                                                            message: 'Data berhasil disimpan!'
-                                                        })
-                                                    }
-                                                })
-                                            }
-                                        })
-                                    }
-                                })
-                            })
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            return res.status(403).send({
-                message: 'Email atau Nomor Handphone yang anda masukkan sudah terdaftar!'
-            })
-        }
+                  } else {
+                    return res.status(200).send({
+                      message: "Data berhasil disimpan!",
+                      error: null,
+                      data: null,
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      });
     }
+  });
 }
 
 /**
  * @swagger
- * /pengguna:
+ * /pengguna/:idpengguna:
  *  put:
  *      summary: mengubah data pengguna, dan password di encrypt
  *      tags: [Pengguna]
@@ -269,7 +237,7 @@ async function addPengguna(req, res) {
  *            name: parameter yang dikirim
  *            schema:
  *              properties:
- *                  nama: 
+ *                  nama:
  *                      type: string
  *                  jabatan:
  *                      type: string
@@ -277,6 +245,8 @@ async function addPengguna(req, res) {
  *                      type: string
  *                  password:
  *                      type: string
+ *                  aktif:
+ *                      type: integer
  *      responses:
  *          200:
  *              description: jika data berhasil di fetch
@@ -289,97 +259,94 @@ async function addPengguna(req, res) {
  *          405:
  *              description: parameter yang dikirim tidak sesuai
  *          407:
- *              description: gagal generate encrypt password 
+ *              description: gagal generate encrypt password
  *          500:
  *              description: kesalahan pada query sql
  */
 
 async function ubahPengguna(req, res) {
-    var nama = req.body.nama
-    var jabatan = req.body.jabatan
-    var username = req.body.username
-    var password = req.body.password
-    var aktif = req.body.aktif
-    const token = req.headers.authorization.split(' ')[1];
-    if (Object.keys(req.body).length != 5) {
-        return res.status(405).send({
-            message: 'parameter tidak sesuai!'
-        })
+  var idpengguna = req.params.idpengguna;
+  var nama = req.body.nama;
+  var jabatan = req.body.jabatan;
+  var username = req.body.username;
+  var password = req.body.password;
+  var aktif = req.body.aktif;
+  if (idpengguna == "" || idpengguna == null) {
+    return res.status(400).send({
+      message: "Parameter doesn't match!",
+      error: null,
+      data: null,
+    });
+  }
+  pool.getConnection(function (error, database) {
+    if (error) {
+      return res.status(400).send({
+        message: "Sorry, Pool Refushed",
+        error: error,
+        data: null,
+      });
     } else {
-        try {
-            jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-                if (jwterror) {
-                    return res.status(401).send({
-                        message: "Sorry, Token tidak valid!",
-                        data: jwterror
+      database.beginTransaction(function (error) {
+        bcrypt.hash(password, 10, (errorencrypt, encrypt) => {
+          if (errorencrypt) {
+            return res.status(400).send({
+              message: "Gagal generate password!",
+              error: errorencrypt,
+              data: null,
+            });
+          } else {
+            let datapengguna = {
+              nama: nama,
+              jabatan: jabatan,
+              username: username,
+              password: encrypt,
+              aktif: aktif,
+              created: nows.nows,
+            };
+            var sqlquery = "UPDATE pengguna set ? WHERE idpengguna = ?";
+            database.query(
+              sqlquery,
+              [datapengguna, idpengguna],
+              (error, result) => {
+                database.release();
+                if (error) {
+                  database.rollback(function () {
+                    return res.status(407).send({
+                      message: "Sorry :(, we have problems sql query!",
+                      error: error,
+                      data: null,
                     });
+                  });
                 } else {
-                    pool.getConnection(function (error, database) {
-                        if (error) {
-                            return res.status(400).send({
-                                message: "Soory, Pool Refushed",
-                                data: error
-                            });
-                        } else {
-                            database.beginTransaction(function (error) {
-                                bcrypt.hash(password, 10, (errorencrypt, encrypt) => {
-                                    if (errorencrypt) {
-                                        return res.status(400).send({
-                                            message: 'Gagal generate password!'
-                                        });
-                                    } else {
-                                        let datapengguna = {
-                                            nama: nama,
-                                            jabatan: jabatan,
-                                            username: username,
-                                            password: encrypt,
-                                            aktif: aktif,
-                                            created: new new Date().toISOString().replace('T', ' ').substring(0,19)
-                                        }
-                                        var sqlquery = "UPDATE pengguna set ? WHERE idpengguna = ?"
-                                        database.query(sqlquery, [datapengguna, jwtresult.idpengguna], (error, result) => {
-                                            if (error) {
-                                                database.rollback(function () {
-                                                    database.release()
-                                                    return res.status(407).send({
-                                                        message: 'Sorry :(, we have problems sql query!'
-                                                    })
-                                                })
-                                            } else {
-                                                database.commit(function (errcommit) {
-                                                    if (errcommit) {
-                                                        database.rollback(function () {
-                                                            database.release()
-                                                            return res.status(400).send({
-                                                                message: 'data gagal disimpan!'
-                                                            })
-                                                        })
-                                                    } else {
-                                                        database.release()
-                                                        return res.status(200).send({
-                                                            message: 'Data berhasil disimpan!'
-                                                        })
-                                                    }
-                                                })
-                                            }
-                                        })
-                                    }
-                                })
-                            })
-                        }
-                    })
+                  database.commit(function (errcommit) {
+                    if (errcommit) {
+                      database.rollback(function () {
+                        return res.status(400).send({
+                          message: "data gagal disimpan!",
+                          error: errcommit,
+                          data: null,
+                        });
+                      });
+                    } else {
+                      return res.status(200).send({
+                        message: "Data berhasil diperbarui!",
+                        error: null,
+                        data: null,
+                      });
+                    }
+                  });
                 }
-            })
-        } catch (error) {
-            return res.status(403).send({
-                message: 'Email atau Nomor Handphone yang anda masukkan sudah terdaftar!'
-            })
-        }
+              }
+            );
+          }
+        });
+      });
     }
+  });
 }
 
 module.exports = {
-    getAllPengguna,
-    addPengguna,
-    ubahPengguna
-}
+  getAllPengguna,
+  addPengguna,
+  ubahPengguna,
+};

@@ -1,15 +1,6 @@
-require('dotenv').config()
-const jwt = require('jsonwebtoken')
-const mysql = require('mysql')
-const bcrypt = require('bcrypt')
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-    timezone: 'utc-8'
-})
+require("dotenv").config();
+const pool = require("../utils/pool.configuration");
+const nows = require("../utils/golobal.variable");
 
 /**
  * @swagger
@@ -32,7 +23,7 @@ const pool = mysql.createPool({
  *              idnomor_rumah:
  *                  type: int
  *                  description: auto increment
- *              kode: 
+ *              kode:
  *                  type: string
  *                  description: kode rumah
  *              keterangan:
@@ -84,53 +75,41 @@ const pool = mysql.createPool({
  */
 
 async function getAllRumah(req, res) {
-    const token = req.headers.authorization.split(' ')[1]
-    try {
-        jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-            if (jwterror) {
-                return res.status(401).send({
-                    message: "Sorry, Token tidak valid!",
-                    data: jwterror
-                })
-            } else {
-                pool.getConnection(function (error, database) {
-                    if (error) {
-                        return res.status(400).send({
-                            message: "Pool refushed, sorry :(, try again or contact developer",
-                            data: error
-                        })
-                    } else {
-                        console.log('Get Rumah...')
-                        var sqlquery = "SELECT * FROM nomor_rumah"
-                        database.query(sqlquery, (error, rows) => {
-                            if (error) {
-                                return res.status(500).send({
-                                    message: "Sorry :(, my query has been error",
-                                    data: error
-                                });
-                            } else {
-                                if (rows.length <= 0) {
-                                    return res.status(204).send({
-                                        message: "Data masih kosong",
-                                        data: rows
-                                    });
-                                } else {
-                                    return res.status(200).send({
-                                        message: "Data berhasil fetch.",
-                                        data: rows
-                                    });
-                                }
-                            }
-                        })
-                    }
-                })
-            }
-        })
-    } catch (error) {
-        return res.status(403).send({
-            message: "Forbidden."
-        });
+  pool.getConnection(function (error, database) {
+    if (error) {
+      return res.status(400).send({
+        message: "Pool refushed, sorry :(, try again or contact developer",
+        error: error,
+        data: null,
+      });
+    } else {
+      var sqlquery = "SELECT * FROM rumah";
+      database.query(sqlquery, (error, rows) => {
+        database.release();
+        if (error) {
+          return res.status(500).send({
+            message: "Sorry :(, my query has been error",
+            error: error,
+            data: null,
+          });
+        } else {
+          if (rows.length <= 0) {
+            return res.status(204).send({
+              message: "Data masih kosong",
+              error: null,
+              data: rows,
+            });
+          } else {
+            return res.status(200).send({
+              message: "Data berhasil fetch.",
+              error: null,
+              data: rows,
+            });
+          }
+        }
+      });
     }
+  });
 }
 
 /**
@@ -155,54 +134,49 @@ async function getAllRumah(req, res) {
  */
 
 async function getDetailRumah(req, res) {
-    const token = req.headers.authorization.split(' ')[1]
-    var barcode_gen = req.params.barcode_gen
-    try {
-        jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-            if (jwterror) {
-                return res.status(401).send({
-                    message: "Sorry, Token tidak valid!",
-                    data: jwterror
-                })
-            } else {
-                pool.getConnection(function (error, database) {
-                    if (error) {
-                        return res.status(400).send({
-                            message: "Pool refushed, sorry :(, try again or contact developer",
-                            data: error
-                        })
-                    } else {
-                        var sqlquery = "SELECT * FROM nomor_rumah WHERE barcode_gen = ?"
-                        database.query(sqlquery, barcode_gen, (error, rows) => {
-                            if (error) {
-                                return res.status(500).send({
-                                    message: "Sorry :(, my query has been error",
-                                    data: error
-                                });
-                            } else {
-                                if (rows.length <= 0) {
-                                    return res.status(200).send({
-                                        message: "Data tidak ditemukan!",
-                                        data: rows
-                                    });
-                                } else {
-                                    return res.status(200).send({
-                                        message: "Data berhasil fetch.",
-                                        data: rows
-                                    });
-                                }
-                            }
-                        })
-                    }
-                })
-            }
-        })
-    } catch (error) {
-        return res.status(403).send({
-            message: "Forbidden.",
-            data: rows
-        });
+  var barcode_gen = req.params.barcode_gen;
+  if (barcode_gen == "" || barcode_gen == null) {
+    return res.status(400).send({
+      message: "Parameter doesn't match!",
+      error: null,
+      data: null,
+    });
+  }
+  pool.getConnection(function (error, database) {
+    if (error) {
+      return res.status(400).send({
+        message: "Pool refushed, sorry :(, try again or contact developer",
+        error: error,
+        data: null,
+      });
+    } else {
+      var sqlquery = "SELECT * FROM nomor_rumah WHERE barcode_gen = ?";
+      database.query(sqlquery, barcode_gen, (error, rows) => {
+        database.release();
+        if (error) {
+          return res.status(500).send({
+            message: "Sorry :(, my query has been error",
+            error: error,
+            data: null,
+          });
+        } else {
+          if (rows.length <= 0) {
+            return res.status(200).send({
+              message: "Data tidak ditemukan!",
+              error: null,
+              data: rows,
+            });
+          } else {
+            return res.status(200).send({
+              message: "Data berhasil fetch.",
+              error: null,
+              data: rows,
+            });
+          }
+        }
+      });
     }
+  });
 }
 
 /**
@@ -220,7 +194,7 @@ async function getDetailRumah(req, res) {
  *            name: parameter yang dikirim
  *            schema:
  *              properties:
- *                  nama: 
+ *                  nama:
  *                      type: string
  *                  jabatan:
  *                      type: string
@@ -240,114 +214,94 @@ async function getDetailRumah(req, res) {
  *          405:
  *              description: parameter yang dikirim tidak sesuai
  *          407:
- *              description: gagal generate encrypt password 
+ *              description: gagal generate encrypt password
  *          500:
  *              description: kesalahan pada query sql
  */
 
 async function addRumah(req, res) {
-    var kode = req.body.kode
-    var keterangan = req.body.keterangan
-    var jenis_rumah = req.body.jenis_rumah
-    var aktif = req.body.aktif
-    const token = req.headers.authorization.split(' ')[1];
-    if (Object.keys(req.body).length != 4) {
-        return res.status(405).send({
-            message: 'parameter tidak sesuai!'
-        })
-    } else {
-        try {
-            jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-                if (jwterror) {
-                    return res.status(401).send({
-                        message: "Sorry, Token tidak valid!",
-                        data: jwterror
-                    });
+  var kode = req.body.kode;
+  var keterangan = req.body.keterangan;
+  var jenis_rumah = req.body.jenis_rumah;
+  var aktif = req.body.aktif;
+  pool.getConnection(function (error, database) {
+    bcrypt.hash(jenis_rumah, 4, (errorencrypt, encrypt) => {
+      if (errorencrypt) {
+        return res.status(400).send({
+          message: "Gagal generate password!",
+        });
+      } else {
+        if (error) {
+          return res.status(400).send({
+            message: "Soory, Pool Refushed",
+            data: error,
+          });
+        } else {
+          database.beginTransaction(function (error) {
+            let datarumah = {
+              kode: kode,
+              keterangan: keterangan,
+              jenis_rumah: jenis_rumah,
+              barcode_gen: encrypt,
+              idpengguna: jwtresult.idpengguna,
+              aktif: aktif,
+              created: new Date()
+                .toISOString()
+                .replace("T", " ")
+                .substring(0, 19),
+            };
+            var sqldatafilter = "SELECT * FROM nomor_rumah WHERE kode = ?";
+            database.query(sqldatafilter, kode, (error, result) => {
+              if (error) {
+                database.rollback(function () {
+                  database.release();
+                  return res.status(407).send({
+                    message: "Sorry :(, we have problems sql query!",
+                    error: error,
+                  });
+                });
+              } else {
+                if (result.length <= 0) {
+                  var sqlquery = "INSERT INTO nomor_rumah SET ?";
+                  database.query(sqlquery, datarumah, (error, result) => {
+                    if (error) {
+                      database.rollback(function () {
+                        database.release();
+                        return res.status(407).send({
+                          message: "Sorry :(, we have problems sql query!",
+                          error: error,
+                        });
+                      });
+                    } else {
+                      database.commit(function (errcommit) {
+                        if (errcommit) {
+                          database.rollback(function () {
+                            database.release();
+                            return res.status(407).send({
+                              message: "data gagal disimpan!",
+                            });
+                          });
+                        } else {
+                          database.release();
+                          return res.status(200).send({
+                            message: "Data berhasil disimpan!",
+                          });
+                        }
+                      });
+                    }
+                  });
                 } else {
-                    pool.getConnection(function (error, database) {
-                        bcrypt.hash(jenis_rumah, 4, (errorencrypt, encrypt) => {
-                            if (errorencrypt) {
-                                return res.status(400).send({
-                                    message: 'Gagal generate password!'
-                                });
-                            } else {
-                                if (error) {
-                                    return res.status(400).send({
-                                        message: "Soory, Pool Refushed",
-                                        data: error
-                                    });
-                                } else {
-                                    database.beginTransaction(function (error) {
-                                        let datarumah = {
-                                            kode: kode,
-                                            keterangan: keterangan,
-                                            jenis_rumah: jenis_rumah,
-                                            barcode_gen: encrypt,
-                                            idpengguna: jwtresult.idpengguna,
-                                            aktif: aktif,
-                                            created: new Date().toISOString().replace('T', ' ').substring(0, 19)
-                                        }
-                                        var sqldatafilter = 'SELECT * FROM nomor_rumah WHERE kode = ?'
-                                        database.query(sqldatafilter, kode, (error, result) => {
-                                          if(error){
-                                            database.rollback(function () {
-                                                database.release()
-                                                return res.status(407).send({
-                                                    message: 'Sorry :(, we have problems sql query!',
-                                                    error: error
-                                                })
-                                            })
-                                          }  else{
-                                              if(result.length <=0){
-                                                var sqlquery = "INSERT INTO nomor_rumah SET ?"
-                                                database.query(sqlquery, datarumah, (error, result) => {
-                                                    if (error) {
-                                                        database.rollback(function () {
-                                                            database.release()
-                                                            return res.status(407).send({
-                                                                message: 'Sorry :(, we have problems sql query!',
-                                                                error: error
-                                                            })
-                                                        })
-                                                    } else {
-                                                        database.commit(function (errcommit) {
-                                                            if (errcommit) {
-                                                                database.rollback(function () {
-                                                                    database.release()
-                                                                    return res.status(407).send({
-                                                                        message: 'data gagal disimpan!'
-                                                                    })
-                                                                })
-                                                            } else {
-                                                                database.release()
-                                                                return res.status(200).send({
-                                                                    message: 'Data berhasil disimpan!'
-                                                                })
-                                                            }
-                                                        })
-                                                    }
-                                                })
-        
-                                              }else{
-                                                    return res.status(400).send({
-                                                        message: `Kode ${kode} sudah terdaftar!`
-                                                    })
-                                              }
-                                          }
-                                        })
-                                    })
-                                }
-                            }
-                        })
-                    })
+                  return res.status(400).send({
+                    message: `Kode ${kode} sudah terdaftar!`,
+                  });
                 }
-            })
-        } catch (error) {
-            return res.status(403).send({
-                message: 'Email atau Nomor Handphone yang anda masukkan sudah terdaftar!'
-            })
+              }
+            });
+          });
         }
-    }
+      }
+    });
+  });
 }
 
 /**
@@ -365,7 +319,7 @@ async function addRumah(req, res) {
  *            name: parameter yang dikirim
  *            schema:
  *              properties:
- *                  nama: 
+ *                  nama:
  *                      type: string
  *                  jabatan:
  *                      type: string
@@ -385,85 +339,95 @@ async function addRumah(req, res) {
  *          405:
  *              description: parameter yang dikirim tidak sesuai
  *          407:
- *              description: gagal generate encrypt password 
+ *              description: gagal generate encrypt password
  *          500:
  *              description: kesalahan pada query sql
  */
 
 async function ubahRumah(req, res) {
-    var kode = req.body.kode
-    var keterangan = req.body.keterangan
-    var jenis_rumah = req.body.jenis_rumah
-    var aktif = req.body.aktif
-    var idnomor_rumah = req.params.idnomor_rumah
-    const token = req.headers.authorization.split(' ')[1];
-
-    try {
-        jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-            if (jwterror) {
-                return res.status(401).send({
-                    message: "Sorry, Token tidak valid!",
-                    data: jwterror
-                });
-            } else {
-                pool.getConnection(function (error, database) {
-                    if (error) {
-                        return res.status(400).send({
-                            message: "Soory, Pool Refushed",
-                            data: error
+  var kode = req.body.kode;
+  var keterangan = req.body.keterangan;
+  var jenis_rumah = req.body.jenis_rumah;
+  var aktif = req.body.aktif;
+  var idrumah = req.params.idrumah;
+  const token = req.headers.authorization.split(" ")[1];
+  if (idrumah == "" || idrumah == null) {
+    return res.status(400).send({
+      message: "Parameter doesn't match!",
+      error: null,
+      data: null,
+    });
+  }
+  try {
+    jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
+      if (jwterror) {
+        return res.status(401).send({
+          message: "Sorry, Token tidak valid!",
+          data: jwterror,
+        });
+      } else {
+        pool.getConnection(function (error, database) {
+          if (error) {
+            return res.status(400).send({
+              message: "Soory, Pool Refushed",
+              data: error,
+            });
+          } else {
+            database.beginTransaction(function (error) {
+              let datarumah = {
+                kode: kode,
+                keterangan: keterangan,
+                jenis_rumah: jenis_rumah,
+                idpengguna: jwtresult.idpengguna,
+                aktif: aktif,
+              };
+              var sqlquery = "UPDATE nomor_rumah set ? WHERE idnomor_rumah = ?";
+              database.query(
+                sqlquery,
+                [datarumah, idnomor_rumah],
+                (error, result) => {
+                  if (error) {
+                    database.rollback(function () {
+                      database.release();
+                      return res.status(407).send({
+                        message: "Sorry :(, we have problems sql query!",
+                        error: error,
+                      });
+                    });
+                  } else {
+                    database.commit(function (errcommit) {
+                      if (errcommit) {
+                        database.rollback(function () {
+                          database.release();
+                          return res.status(400).send({
+                            message: "data gagal disimpan!",
+                          });
                         });
-                    } else {
-                        database.beginTransaction(function (error) {
-                            let datarumah = {
-                                kode: kode,
-                                keterangan: keterangan,
-                                jenis_rumah: jenis_rumah,
-                                idpengguna: jwtresult.idpengguna,
-                                aktif: aktif
-                            }
-                            var sqlquery = "UPDATE nomor_rumah set ? WHERE idnomor_rumah = ?"
-                            database.query(sqlquery, [datarumah, idnomor_rumah], (error, result) => {
-                                if (error) {
-                                    database.rollback(function () {
-                                        database.release()
-                                        return res.status(407).send({
-                                            message: 'Sorry :(, we have problems sql query!',
-                                            error: error
-                                        })
-                                    })
-                                } else {
-                                    database.commit(function (errcommit) {
-                                        if (errcommit) {
-                                            database.rollback(function () {
-                                                database.release()
-                                                return res.status(400).send({
-                                                    message: 'data gagal disimpan!'
-                                                })
-                                            })
-                                        } else {
-                                            database.release()
-                                            return res.status(200).send({
-                                                message: 'Data berhasil disimpan!'
-                                            })
-                                        }
-                                    })
-                                }
-                            })
-                        })
-                    }
-                })
-            }
-        })
-    } catch (error) {
-        return res.status(403).send({
-            message: 'Email atau Nomor Handphone yang anda masukkan sudah terdaftar!'
-        })
-    }
+                      } else {
+                        database.release();
+                        return res.status(200).send({
+                          message: "Data berhasil disimpan!",
+                        });
+                      }
+                    });
+                  }
+                }
+              );
+            });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    return res.status(403).send({
+      message: "Email atau Nomor Handphone yang anda masukkan sudah terdaftar!",
+    });
+  }
 }
 
 module.exports = {
-    getAllRumah,
-    getDetailRumah,
-    addRumah,
-    ubahRumah
-}
+  getAllRumah,
+  getDetailRumah,
+  addRumah,
+  ubahRumah,
+};

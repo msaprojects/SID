@@ -1,15 +1,7 @@
-require('dotenv').config()
-const jwt = require('jsonwebtoken')
-const mysql = require('mysql')
-const bcrypt = require('bcrypt')
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT,
-    timezone: 'utc-8'
-})
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const pool = require("../utils/pool.configuration");
 
 /**
  * @swagger
@@ -31,7 +23,7 @@ const pool = mysql.createPool({
  *              idtagihan:
  *                  type: int
  *                  description: auto increment
- *              keterangan: 
+ *              keterangan:
  *                  type: string
  *                  description: untuk mencatat tagihan
  *              nominal:
@@ -61,7 +53,6 @@ const pool = mysql.createPool({
  *  description: API untuk menentukan tagihan
  */
 
-
 /**
  * @swagger
  * /tagihan:
@@ -84,53 +75,54 @@ const pool = mysql.createPool({
  */
 
 async function getSemuaTagihan(req, res) {
-    const token = req.headers.authorization.split(' ')[1]
-    try {
-        jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-            if (jwterror) {
-                return res.status(401).send({
-                    message: "Sorry, Token tidak valid!",
-                    data: jwterror
-                })
-            } else {
-                pool.getConnection(function (error, database) {
-                    if (error) {
-                        return res.status(400).send({
-                            message: "Pool refushed, sorry :(, try again or contact developer",
-                            data: error
-                        })
-                    } else {
-                        console.log('Get Rumah...')
-                        var sqlquery = "SELECT * FROM tagihan"
-                        database.query(sqlquery, (error, rows) => {
-                            if (error) {
-                                return res.status(500).send({
-                                    message: "Sorry :(, my query has been error",
-                                    data: error
-                                });
-                            } else {
-                                if (rows.length <= 0) {
-                                    return res.status(204).send({
-                                        message: "Data masih kosong",
-                                        data: rows
-                                    });
-                                } else {
-                                    return res.status(200).send({
-                                        message: "Data berhasil fetch.",
-                                        data: rows
-                                    });
-                                }
-                            }
-                        })
-                    }
-                })
-            }
-        })
-    } catch (error) {
-        return res.status(403).send({
-            message: "Forbidden."
+  const token = req.headers.authorization.split(" ")[1];
+  try {
+    jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
+      if (jwterror) {
+        return res.status(401).send({
+          message: "Sorry, Token tidak valid!",
+          data: jwterror,
         });
-    }
+      } else {
+        pool.getConnection(function (error, database) {
+          if (error) {
+            return res.status(400).send({
+              message:
+                "Pool refushed, sorry :(, try again or contact developer",
+              data: error,
+            });
+          } else {
+            console.log("Get Rumah...");
+            var sqlquery = "SELECT * FROM tagihan";
+            database.query(sqlquery, (error, rows) => {
+              if (error) {
+                return res.status(500).send({
+                  message: "Sorry :(, my query has been error",
+                  data: error,
+                });
+              } else {
+                if (rows.length <= 0) {
+                  return res.status(204).send({
+                    message: "Data masih kosong",
+                    data: rows,
+                  });
+                } else {
+                  return res.status(200).send({
+                    message: "Data berhasil fetch.",
+                    data: rows,
+                  });
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    return res.status(403).send({
+      message: "Forbidden.",
+    });
+  }
 }
 
 /**
@@ -148,7 +140,7 @@ async function getSemuaTagihan(req, res) {
  *            name: parameter yang dikirim
  *            schema:
  *              properties:
- *                  keterangan: 
+ *                  keterangan:
  *                      type: string
  *                  nominal:
  *                      type: string
@@ -168,85 +160,89 @@ async function getSemuaTagihan(req, res) {
  *          405:
  *              description: parameter yang dikirim tidak sesuai
  *          407:
- *              description: gagal generate encrypt password 
+ *              description: gagal generate encrypt password
  *          500:
  *              description: kesalahan pada query sql
  */
 
 async function addTagihan(req, res) {
-    var keterangan = req.body.keterangan
-    var nominal = req.body.nominal
-    var idbulan = req.body.idbulan
-    var aktif = req.body.aktif
-    const token = req.headers.authorization.split(' ')[1];
-    if (Object.keys(req.body).length != 4) {
-        return res.status(405).send({
-            message: 'parameter tidak sesuai!'
-        })
-    } else {
-        try {
-            jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-                if (jwterror) {
-                    return res.status(401).send({
-                        message: "Sorry, Token tidak valid!",
-                        data: jwterror
+  var keterangan = req.body.keterangan;
+  var nominal = req.body.nominal;
+  var idbulan = req.body.idbulan;
+  var aktif = req.body.aktif;
+  const token = req.headers.authorization.split(" ")[1];
+  if (Object.keys(req.body).length != 4) {
+    return res.status(405).send({
+      message: "parameter tidak sesuai!",
+    });
+  } else {
+    try {
+      jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
+        if (jwterror) {
+          return res.status(401).send({
+            message: "Sorry, Token tidak valid!",
+            data: jwterror,
+          });
+        } else {
+          pool.getConnection(function (error, database) {
+            if (error) {
+              return res.status(400).send({
+                message: "Soory, Pool Refushed",
+                data: error,
+              });
+            } else {
+              database.beginTransaction(function (error) {
+                let datatagihan = {
+                  keterangan: keterangan,
+                  nominal: nominal,
+                  idbulan: idbulan,
+                  idpengguna: jwtresult.idpengguna,
+                  aktif: aktif,
+                  created: new Date()
+                    .toISOString()
+                    .replace("T", " ")
+                    .substring(0, 19),
+                };
+                var sqlquery = "INSERT INTO tagihan SET ?";
+                database.query(sqlquery, datatagihan, (error, result) => {
+                  if (error) {
+                    database.rollback(function () {
+                      database.release();
+                      return res.status(407).send({
+                        message: "Sorry :(, we have problems sql query!",
+                        error: error,
+                      });
                     });
-                } else {
-                    pool.getConnection(function (error, database) {
-                        if (error) {
-                            return res.status(400).send({
-                                message: "Soory, Pool Refushed",
-                                data: error
-                            });
-                        } else {
-                            database.beginTransaction(function (error) {
-                                let datatagihan = {
-                                    keterangan: keterangan,
-                                    nominal: nominal,
-                                    idbulan: idbulan,
-                                    idpengguna: jwtresult.idpengguna,
-                                    aktif: aktif,
-                                    created: new Date().toISOString().replace('T', ' ').substring(0, 19)
-                                }
-                                var sqlquery = "INSERT INTO tagihan SET ?"
-                                database.query(sqlquery, datatagihan, (error, result) => {
-                                    if (error) {
-                                        database.rollback(function () {
-                                            database.release()
-                                            return res.status(407).send({
-                                                message: 'Sorry :(, we have problems sql query!',
-                                                error: error
-                                            })
-                                        })
-                                    } else {
-                                        database.commit(function (errcommit) {
-                                            if (errcommit) {
-                                                database.rollback(function () {
-                                                    database.release()
-                                                    return res.status(407).send({
-                                                        message: 'data gagal disimpan!'
-                                                    })
-                                                })
-                                            } else {
-                                                database.release()
-                                                return res.status(200).send({
-                                                    message: 'Data berhasil disimpan!'
-                                                })
-                                            }
-                                        })
-                                    }
-                                })
-                            })
-                        }
-                    })
-                }
-            })
-        } catch (error) {
-            return res.status(403).send({
-                message: 'Email atau Nomor Handphone yang anda masukkan sudah terdaftar!'
-            })
+                  } else {
+                    database.commit(function (errcommit) {
+                      if (errcommit) {
+                        database.rollback(function () {
+                          database.release();
+                          return res.status(407).send({
+                            message: "data gagal disimpan!",
+                          });
+                        });
+                      } else {
+                        database.release();
+                        return res.status(200).send({
+                          message: "Data berhasil disimpan!",
+                        });
+                      }
+                    });
+                  }
+                });
+              });
+            }
+          });
         }
+      });
+    } catch (error) {
+      return res.status(403).send({
+        message:
+          "Email atau Nomor Handphone yang anda masukkan sudah terdaftar!",
+      });
     }
+  }
 }
 
 /**
@@ -264,7 +260,7 @@ async function addTagihan(req, res) {
  *            name: parameter yang dikirim
  *            schema:
  *              properties:
- *                  idtagihan: 
+ *                  idtagihan:
  *                      type: string
  *                  keterangan:
  *                      type: string
@@ -286,84 +282,98 @@ async function addTagihan(req, res) {
  *          405:
  *              description: parameter yang dikirim tidak sesuai
  *          407:
- *              description: gagal generate encrypt password 
+ *              description: gagal generate encrypt password
  *          500:
  *              description: kesalahan pada query sql
  */
 
 async function ubahTagihan(req, res) {
-    var keterangan = req.body.keterangan
-    var nominal = req.body.nominal
-    var idbulan = req.body.idbulan
-    var aktif = req.body.aktif
-    var idtagihan = req.params.idtagihan
-    const token = req.headers.authorization.split(' ')[1];
-    try {
-        jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
-            if (jwterror) {
-                return res.status(401).send({
-                    message: "Sorry, Token tidak valid!",
-                    data: jwterror
-                });
-            } else {
-                pool.getConnection(function (error, database) {
-                    if (error) {
-                        return res.status(400).send({
-                            message: "Soory, Pool Refushed",
-                            data: error
+  var keterangan = req.body.keterangan;
+  var nominal = req.body.nominal;
+  var idbulan = req.body.idbulan;
+  var aktif = req.body.aktif;
+  var idtagihan = req.params.idtagihan;
+  const token = req.headers.authorization.split(" ")[1];
+  if (idtagihan == "" || idtagihan == null) {
+    return res.status(400).send({
+      message: "Parameter doesn't match!",
+      error: null,
+      data: null,
+    });
+  }
+  try {
+    jwt.verify(token, process.env.ACCESS_SECRET, (jwterror, jwtresult) => {
+      if (jwterror) {
+        return res.status(401).send({
+          message: "Sorry, Token tidak valid!",
+          data: jwterror,
+        });
+      } else {
+        pool.getConnection(function (error, database) {
+          if (error) {
+            return res.status(400).send({
+              message: "Soory, Pool Refushed",
+              data: error,
+            });
+          } else {
+            database.beginTransaction(function (error) {
+              let datatagihan = {
+                keterangan: keterangan,
+                nominal: nominal,
+                idbulan: idbulan,
+                idpengguna: jwtresult.idpengguna,
+                aktif: aktif,
+                edited: new Date()
+                  .toISOString()
+                  .replace("T", " ")
+                  .substring(0, 19),
+              };
+              var sqlquery = "UPDATE tagihan set ? WHERE idtagihan = ?";
+              database.query(
+                sqlquery,
+                [datatagihan, idtagihan],
+                (error, result) => {
+                  if (error) {
+                    database.rollback(function () {
+                      database.release();
+                      return res.status(407).send({
+                        message: "Sorry :(, we have problems sql query!",
+                        error: error,
+                      });
+                    });
+                  } else {
+                    database.commit(function (errcommit) {
+                      if (errcommit) {
+                        database.rollback(function () {
+                          database.release();
+                          return res.status(400).send({
+                            message: "data gagal disimpan!",
+                          });
                         });
-                    } else {
-                        database.beginTransaction(function (error) {
-                            let datatagihan = {
-                                keterangan: keterangan,
-                                nominal: nominal,
-                                idbulan: idbulan,
-                                idpengguna: jwtresult.idpengguna,
-                                aktif: aktif,
-                                edited: new Date().toISOString().replace('T', ' ').substring(0, 19)
-                            }
-                            var sqlquery = "UPDATE tagihan set ? WHERE idtagihan = ?"
-                            database.query(sqlquery, [datatagihan, idtagihan], (error, result) => {
-                                if (error) {
-                                    database.rollback(function () {
-                                        database.release()
-                                        return res.status(407).send({
-                                            message: 'Sorry :(, we have problems sql query!',
-                                            error: error
-                                        })
-                                    })
-                                } else {
-                                    database.commit(function (errcommit) {
-                                        if (errcommit) {
-                                            database.rollback(function () {
-                                                database.release()
-                                                return res.status(400).send({
-                                                    message: 'data gagal disimpan!'
-                                                })
-                                            })
-                                        } else {
-                                            database.release()
-                                            return res.status(200).send({
-                                                message: 'Data berhasil disimpan!'
-                                            })
-                                        }
-                                    })
-                                }
-                            })
-                        })
-                    }
-                })
-            }
-        })
-    } catch (error) {
-        return res.status(403).send({
-            message: 'Email atau Nomor Handphone yang anda masukkan sudah terdaftar!'
-        })
-    }
+                      } else {
+                        database.release();
+                        return res.status(200).send({
+                          message: "Data berhasil disimpan!",
+                        });
+                      }
+                    });
+                  }
+                }
+              );
+            });
+          }
+        });
+      }
+    });
+  } catch (error) {
+    return res.status(403).send({
+      message: "Email atau Nomor Handphone yang anda masukkan sudah terdaftar!",
+    });
+  }
 }
 
 module.exports = {
-    getSemuaTagihan,
-    addTagihan,
-    ubahTagihan
-}
+  getSemuaTagihan,
+  addTagihan,
+  ubahTagihan,
+};

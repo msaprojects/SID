@@ -1,0 +1,7 @@
+Title: Sequence Login API
+login->validasi parameter:
+validasi parameter->cek database:jika parameter\nvalid
+validasi parameter-->400:parameter not match
+cek database->>200:jika ada, sekalian generate token
+note right of 200: jika berhasil login,\nmaka return dari api adalah\ntoken,username dan jabatan
+cek database-->>200:jika tidak,\nmessage: username tidak ada

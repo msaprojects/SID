@@ -1,0 +1,6 @@
+Title: API PENGGUNA
+
+parameters->cek parameter: validasi parameter
+cek parameter->bcrypt: encrypt password
+bcrypt-->500:gagal encrypt
+bcrypt->simpan database:

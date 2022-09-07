@@ -1,5 +1,5 @@
-const dbConfig = require('../configs/dbConfig')
-const Sequelize = require('sequelize')
+const dbConfig = require('../configs/dbConfig');
+const Sequelize = require('sequelize');
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
     host: dbConfig.HOST,
     dialect: dbConfig.dialect,
@@ -14,23 +14,23 @@ const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
         acquire: dbConfig.pool.acquire,
         idle: dbConfig.pool.idle
     }
-})
+});
 
-const db = {}
+const db = {};
 
-db.Sequelize = Sequelize
-db.sequelize = sequelize
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
 
 /// called model file
 //| as rumah
-db.RumahModel = require('./rumah.model')(sequelize, Sequelize)
+db.RumahModel = require('./rumah.model')(sequelize, Sequelize);
 //| as pengguna
-db.PenggunaModel = require('./pengguna.model')(sequelize, Sequelize)
+db.PenggunaModel = require('./pengguna.model')(sequelize, Sequelize);
 //| as tagihan
-db.TagihanModel = require('./tagihan.model')(sequelize, Sequelize)
+db.TagihanModel = require('./tagihan.model')(sequelize, Sequelize);
 //| as setting iuran
-db.SettingIuranModel = require('./settingiuran.model')(sequelize, Sequelize)
+db.SettingIuranModel = require('./settingiuran.model')(sequelize, Sequelize);
 //| as pembayaran
-db.PembayaranModel = require('./pembayaran.model')(sequelize, Sequelize)
+db.PembayaranModel = require('./pembayaran.model')(sequelize, Sequelize);
 
-module.exports = db
+module.exports = db;

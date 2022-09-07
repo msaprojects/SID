@@ -23,6 +23,6 @@ module.exports = (sequelize, Sequelize) => {
         idrumah: {
             type: Sequelize.INTEGER,
         }
-    })
-    return PenggunaModel
-}
+    });
+    return PenggunaModel;
+};

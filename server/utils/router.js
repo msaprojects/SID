@@ -2,24 +2,24 @@ require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 // const tokenVerify = require("./jwt.validation");
-const jwtverification = require('../middleware/jwtverification')
+const jwtverification = require('../middleware/jwtverification');
 
-var RouteToLoginNew = require('../controller/login.controller')
-router.post("/login", RouteToLoginNew.signIn)
+var RouteToLoginNew = require('../controller/login.controller');
+router.post("/login", RouteToLoginNew.signIn);
 
-var RouteToPembayaranNew = require('../controller/pembayara.controller')
-router.get("/pembayaran", jwtverification, RouteToPembayaranNew.findAll)
-router.get("/pembayaran/:idpembayaran", jwtverification, RouteToPembayaranNew.findOne)
-router.post("/pembayaran", jwtverification, RouteToPembayaranNew.createData)
-router.put("/pembayaran/:idpembayaran", jwtverification, RouteToPembayaranNew.updateData)
-router.delete("/pembayaran/:idpembayaran", jwtverification, RouteToPembayaranNew.deleteData)
+var RouteToPembayaranNew = require('../controller/pembayara.controller');
+router.get("/pembayaran", jwtverification, RouteToPembayaranNew.findAll);
+router.get("/pembayaran/:idpembayaran", jwtverification, RouteToPembayaranNew.findOne);
+router.post("/pembayaran", jwtverification, RouteToPembayaranNew.createData);
+router.put("/pembayaran/:idpembayaran", jwtverification, RouteToPembayaranNew.updateData);
+router.delete("/pembayaran/:idpembayaran", jwtverification, RouteToPembayaranNew.deleteData);
 
-var RouteToPenggunaNew = require('../controller/pengguna.controller')
-router.get("/pengguna", jwtverification, RouteToPenggunaNew.findAll)
-router.get("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.findOne)
-router.post("/pengguna", jwtverification, RouteToPenggunaNew.createData)
-router.put("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.updateData)
-router.delete("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.deleteData)
+var RouteToPenggunaNew = require('../controller/pengguna.controller');
+router.get("/pengguna", jwtverification, RouteToPenggunaNew.findAll);
+router.get("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.findOne);
+router.post("/pengguna", jwtverification, RouteToPenggunaNew.createData);
+router.put("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.updateData);
+router.delete("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.deleteData);
 
 var RouteToRumahNew = require('../controller/rumah.controller');
 router.get("/rumah", jwtverification, RouteToRumahNew.findAll);

@@ -23,6 +23,6 @@ module.exports = (sequelize, Sequelize) => {
         idpengguna: {
             type: Sequelize.INTEGER,
         }
-    })
-    return SettingIuranModel
-}
+    });
+    return SettingIuranModel;
+};

@@ -20,6 +20,6 @@ module.exports = (sequelize, Sequelize) => {
         aktif: {
             type: Sequelize.INTEGER
         }
-    })
-    return RumahModel
-}
+    });
+    return RumahModel;
+};

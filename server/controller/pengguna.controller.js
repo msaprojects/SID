@@ -1,7 +1,7 @@
-const loadModel = require('../models')
-const PenggunaModel = loadModel.PenggunaModel
-const Op = loadModel.Sequelize.Op
-const bcrypt = require('bcrypt')
+const loadModel = require('../models');
+const PenggunaModel = loadModel.PenggunaModel;
+const Op = loadModel.Sequelize.Op;
+const bcrypt = require('bcrypt');
 /**
  * @swagger
  * tags:
@@ -10,8 +10,8 @@ const bcrypt = require('bcrypt')
  */
 
 exports.findAll = (req, res) => {
-    const nama = req.query.nama
-    var filter = nama ? { nama: { [Op.nama]: `%${nama}%` } } : null
+    const nama = req.query.nama;
+    var filter = nama ? { nama: { [Op.nama]: `%${nama}%` } } : null;
     PenggunaModel.findAll({
         attributes:{
             exclude: ['password']
@@ -21,39 +21,39 @@ exports.findAll = (req, res) => {
         res.status(200).send({
             message: `Ada ${result.length} data`,
             data: result
-        })
+        });
     }).catch((err) => {
         res.status(500).send({
             message: err.message || "Some error occurred while retrieving data customer",
             data: null
-        })
+        });
     });
-}
+};
 
 exports.findOne = (req, res) => {
-    const idpengguna = req.params.idpengguna
+    const idpengguna = req.params.idpengguna;
     PenggunaModel.findByPk(idpengguna).then((result) => {
         if (result) {
             res.status(200).send({
                 message: `Data ditemukan!`,
                 data: result
-            })
+            });
         } else {
             res.status(204).send({
                 message: `Data tidak ditemukan!`,
                 data: null
-            })
+            });
         }
     }).catch((err) => {
         res.status(500).send({
             message: err.message || "Some error occurred while retrieving data customer",
             data: null
-        })
+        });
     });
-}
+};
 
 exports.createData = (req, res) => {
-    const { nama, password, jabatan, aktif, idrumah } = req.body
+    const { nama, password, jabatan, aktif, idrumah } = req.body;
     PenggunaModel.create({
         nama,
         password: bcrypt.hashSync(password, 8),
@@ -64,18 +64,18 @@ exports.createData = (req, res) => {
         res.status(201).send({
             message: 'Data berhasil ditambahkan!',
             result
-        })
+        });
     }).catch((err) => {
         res.status(500).send({
             message: 'Data gagal ditambahkan!',
             err
-        })
-    })
-}
+        });
+    });
+};
 
 exports.updateData = (req, res) => {
-    const { idpengguna } = req.params
-    const { nama, password, jabatan, aktif, idrumah } = req.body
+    const { idpengguna } = req.params;
+    const { nama, password, jabatan, aktif, idrumah } = req.body;
     PenggunaModel.findByPk(idpengguna).then(function (data) {
         data.update({
             nama,
@@ -87,29 +87,29 @@ exports.updateData = (req, res) => {
             res.status(200).send({
                 message: 'Data berhasil ditambahkan!',
                 result
-            })
+            });
         }).catch((err) => {
             res.status(500).send({
                 message: 'Data gagal ditambahkan!',
                 err
-            })
-        })
-    })
-}
+            });
+        });
+    });
+};
 
 exports.deleteData = (req, res) => {
-    const { idpengguna } = req.params
+    const { idpengguna } = req.params;
     PenggunaModel.findByPk(idpengguna).then(function (data) {
-        data.destroy()
+        data.destroy();
     }).then((result) => {
         res.status(200).send({
             message: 'Data berhasil dihapus!',
             data: null
-        })
+        });
     }).catch((err) => {
         res.status(500).send({
             message: 'Data gagal dihapus!',
             err
-        })
-    })
-}
+        });
+    });
+};

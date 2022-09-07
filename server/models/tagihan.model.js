@@ -19,6 +19,6 @@ module.exports = (sequelize, Sequelize) => {
         idpengguna: {
             type: Sequelize.INTEGER,
         },
-    })
-    return TagihanModel
-}
+    });
+    return TagihanModel;
+};

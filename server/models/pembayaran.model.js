@@ -19,7 +19,7 @@ module.exports = (sequelize, Sequelize) => {
         idtagihan: {
             type: Sequelize.INTEGER,
         },
-    })
-    return PembayaranModel
-}
+    });
+    return PembayaranModel;
+};
 

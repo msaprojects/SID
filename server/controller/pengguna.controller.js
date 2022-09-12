@@ -53,9 +53,10 @@ exports.findOne = (req, res) => {
 };
 
 exports.createData = (req, res) => {
-    const { nama, password, jabatan, aktif, idrumah } = req.body;
+    const { nama, username, password, jabatan, aktif, idrumah } = req.body;
     PenggunaModel.create({
         nama,
+        username,
         password: bcrypt.hashSync(password, 8),
         jabatan,
         aktif,
@@ -75,10 +76,11 @@ exports.createData = (req, res) => {
 
 exports.updateData = (req, res) => {
     const { idpengguna } = req.params;
-    const { nama, password, jabatan, aktif, idrumah } = req.body;
+    const { nama, username, password, jabatan, aktif, idrumah } = req.body;
     PenggunaModel.findByPk(idpengguna).then(function (data) {
         data.update({
             nama,
+            username,
             password: bcrypt.hashSync(password, 8),
             jabatan,
             aktif,

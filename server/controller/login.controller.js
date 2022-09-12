@@ -6,10 +6,10 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const { config } = require('dotenv');
 exports.signIn = (req, res)=>{
-    const {nama, password} = req.body;
+    const {username, password} = req.body;
     PenggunaModel.findOne({
         where:{
-            nama: nama
+            username: username
         }
     }).then((result) => {
         /// checking user name
@@ -29,6 +29,7 @@ exports.signIn = (req, res)=>{
         var generateToken = jwt.sign({idpengguna: result.idpengguna}, process.env.ACCESS_SECRET, {expiresIn: process.env.ACCESS_EXPIRED});
         res.status(200).send({
             nama: result.nama,
+            username: result.username,
             access_token: generateToken,
             jabatan: result.jabatan
         });

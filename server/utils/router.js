@@ -22,11 +22,11 @@ router.put("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.updateDa
 router.delete("/pengguna/:idpengguna", jwtverification, RouteToPenggunaNew.deleteData);
 
 var RouteToRumahNew = require('../controller/rumah.controller');
-router.get("/rumah", jwtverification, RouteToRumahNew.findAll);
-router.get("/rumah/:idrumah", jwtverification, RouteToRumahNew.findOne);
-router.post("/rumah", jwtverification, RouteToRumahNew.createData);
-router.put("/rumah/:idrumah", jwtverification, RouteToRumahNew.updateData);
-router.delete("/rumah/:idrumah", jwtverification, RouteToRumahNew.deleteData);
+router.get("/rumah", RouteToRumahNew.findAll);
+router.get("/rumah/:idrumah", RouteToRumahNew.findOne);
+router.post("/rumah", RouteToRumahNew.createData);
+router.put("/rumah/:idrumah", RouteToRumahNew.updateData);
+router.delete("/rumah/:idrumah", RouteToRumahNew.deleteData);
 
 var RouteToSettingIuranNew = require('../controller/settingiuran.controller');
 router.get("/settingiuran", jwtverification, RouteToSettingIuranNew.findAll);

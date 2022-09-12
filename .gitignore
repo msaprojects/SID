@@ -1,4 +1,5 @@
-
+node_modules
+client
 server/.env
 server/node_modules/
 client/sid/node_modules/

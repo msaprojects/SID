@@ -1,5 +1,6 @@
 node_modules
 client
+controllerold
 server/.env
 server/node_modules/
 client/sid/node_modules/
